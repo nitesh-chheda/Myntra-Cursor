@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { AuthService, User } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
+import { WishlistService } from '../../services/wishlist.service';
 
 @Component({
   selector: 'app-header',
@@ -47,10 +48,10 @@ import { CartService } from '../../services/cart.service';
       <div class="spacer"></div>
       <div class="user-actions">
         <a mat-icon-button routerLink="/wishlist" matTooltip="Wishlist">
-          <mat-icon>favorite_border</mat-icon>
+          <mat-icon [matBadge]="wishlistItemCount > 0 ? wishlistItemCount : null" matBadgeColor="warn">favorite_border</mat-icon>
         </a>
         <a mat-icon-button routerLink="/cart" matTooltip="Cart">
-          <mat-icon [matBadge]="cartItemCount" matBadgeColor="warn">shopping_bag</mat-icon>
+          <mat-icon [matBadge]="cartItemCount > 0 ? cartItemCount : null" matBadgeColor="warn">shopping_bag</mat-icon>
         </a>
         <ng-container *ngIf="currentUser; else authButtons">
           <button mat-icon-button [matMenuTriggerFor]="userMenu" matTooltip="Account">
@@ -146,10 +147,12 @@ export class HeaderComponent implements OnInit {
   currentUser: User | null = null;
   isAdmin = false;
   cartItemCount = 0;
+  wishlistItemCount = 0;
 
   constructor(
     private authService: AuthService,
-    private cartService: CartService
+    private cartService: CartService,
+    private wishlistService: WishlistService
   ) {}
 
   ngOnInit() {
@@ -163,6 +166,10 @@ export class HeaderComponent implements OnInit {
 
     this.cartService.getCartItems().subscribe(items => {
       this.cartItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+    });
+
+    this.wishlistService.getWishlistCount().subscribe(count => {
+      this.wishlistItemCount = count;
     });
   }
 

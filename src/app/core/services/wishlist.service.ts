@@ -1,33 +1,78 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Product } from '../models/product.model';
-import { products } from '../../data/products';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WishlistService {
-  private wishlistItems: Product[] = [];
+  private wishlistItems = new BehaviorSubject<Product[]>([]);
+  private readonly WISHLIST_STORAGE_KEY = 'wishlist_items';
 
-  constructor() {}
+  constructor() {
+    this.loadWishlistFromStorage();
+  }
+
+  private loadWishlistFromStorage() {
+    const storedWishlist = localStorage.getItem(this.WISHLIST_STORAGE_KEY);
+    if (storedWishlist) {
+      this.wishlistItems.next(JSON.parse(storedWishlist));
+    }
+  }
+
+  private saveWishlistToStorage(items: Product[]) {
+    localStorage.setItem(this.WISHLIST_STORAGE_KEY, JSON.stringify(items));
+  }
 
   getWishlistItems(): Observable<Product[]> {
-    return of(this.wishlistItems);
+    return this.wishlistItems.asObservable();
   }
 
-  addToWishlist(product: Product): Observable<Product[]> {
-    if (!this.wishlistItems.find(item => item.id === product.id)) {
-      this.wishlistItems.push(product);
+  addToWishlist(product: Product): void {
+    const currentItems = this.wishlistItems.value;
+    if (!currentItems.find(item => item.id === product.id)) {
+      const updatedItems = [...currentItems, product];
+      this.wishlistItems.next(updatedItems);
+      this.saveWishlistToStorage(updatedItems);
     }
-    return of(this.wishlistItems);
   }
 
-  removeFromWishlist(productId: number): Observable<Product[]> {
-    this.wishlistItems = this.wishlistItems.filter(item => item.id !== productId);
-    return of(this.wishlistItems);
+  removeFromWishlist(productId: number): void {
+    const currentItems = this.wishlistItems.value;
+    const updatedItems = currentItems.filter(item => item.id !== productId);
+    this.wishlistItems.next(updatedItems);
+    this.saveWishlistToStorage(updatedItems);
   }
 
   isInWishlist(productId: number): Observable<boolean> {
-    return of(this.wishlistItems.some(item => item.id === productId));
+    return new Observable<boolean>(observer => {
+      this.wishlistItems.subscribe(items => {
+        observer.next(items.some(item => item.id === productId));
+      });
+    });
+  }
+
+  toggleWishlist(product: Product): void {
+    const currentItems = this.wishlistItems.value;
+    const isInWishlist = currentItems.some(item => item.id === product.id);
+    
+    if (isInWishlist) {
+      this.removeFromWishlist(product.id);
+    } else {
+      this.addToWishlist(product);
+    }
+  }
+
+  getWishlistCount(): Observable<number> {
+    return new Observable<number>(observer => {
+      this.wishlistItems.subscribe(items => {
+        observer.next(items.length);
+      });
+    });
+  }
+
+  clearWishlist(): void {
+    this.wishlistItems.next([]);
+    this.saveWishlistToStorage([]);
   }
 } 

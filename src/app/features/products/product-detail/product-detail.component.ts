@@ -6,8 +6,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../../core/services/product.service';
+import { WishlistService } from '../../../core/services/wishlist.service';
 import { Product } from '../../../core/models/product.model';
 import { CartService, CartItem } from '../../../core/services/cart.service';
 
@@ -21,6 +24,7 @@ import { CartService, CartItem } from '../../../core/services/cart.service';
     MatSelectModule,
     MatFormFieldModule,
     MatInputModule,
+    MatIconModule,
     FormsModule
   ],
   template: `
@@ -64,11 +68,15 @@ import { CartService, CartItem } from '../../../core/services/cart.service';
         </div>
 
         <div class="actions">
-          <button mat-raised-button color="primary" (click)="addToCart()">
+          <button mat-raised-button color="primary" (click)="addToCart()" [disabled]="!product.inStock">
             Add to Cart
           </button>
-          <button mat-button color="accent" (click)="addToWishlist()">
-            Add to Wishlist
+          <button mat-raised-button 
+                  [color]="isInWishlist ? 'warn' : 'accent'" 
+                  (click)="toggleWishlist()"
+                  class="wishlist-button">
+            <mat-icon>{{isInWishlist ? 'favorite' : 'favorite_border'}}</mat-icon>
+            {{isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}}
           </button>
         </div>
 
@@ -152,12 +160,39 @@ import { CartService, CartItem } from '../../../core/services/cart.service';
     .actions {
       display: flex;
       gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .actions button {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .wishlist-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .product-meta {
       margin-top: 20px;
       padding-top: 20px;
       border-top: 1px solid #eee;
+    }
+
+    @media (max-width: 768px) {
+      .product-detail-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      
+      .actions {
+        flex-direction: column;
+      }
+      
+      .actions button {
+        min-width: unset;
+      }
     }
   `]
 })
@@ -166,11 +201,14 @@ export class ProductDetailComponent implements OnInit {
   selectedImage = '';
   selectedSize = '';
   selectedColor = '';
+  isInWishlist = false;
 
   constructor(
     private route: ActivatedRoute,
     private productService: ProductService,
-    private cartService: CartService
+    private cartService: CartService,
+    private wishlistService: WishlistService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
@@ -182,9 +220,18 @@ export class ProductDetailComponent implements OnInit {
           this.selectedImage = product.images[0];
           this.selectedSize = product.sizes[0];
           this.selectedColor = product.colors[0];
+          this.checkWishlistStatus();
         }
       });
     });
+  }
+
+  private checkWishlistStatus() {
+    if (this.product) {
+      this.wishlistService.isInWishlist(this.product.id).subscribe(inWishlist => {
+        this.isInWishlist = inWishlist;
+      });
+    }
   }
 
   addToCart() {
@@ -196,13 +243,27 @@ export class ProductDetailComponent implements OnInit {
         color: this.selectedColor
       };
       this.cartService.addToCart(cartItem);
+      this.snackBar.open(`${this.product.name} added to cart`, 'Close', {
+        duration: 3000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top'
+      });
     }
   }
 
-  addToWishlist() {
+  toggleWishlist() {
     if (this.product) {
-      // TODO: Implement wishlist functionality
-      console.log('Adding to wishlist:', this.product);
+      this.wishlistService.toggleWishlist(this.product);
+      this.isInWishlist = !this.isInWishlist;
+      const message = this.isInWishlist 
+        ? `${this.product.name} added to wishlist` 
+        : `${this.product.name} removed from wishlist`;
+      
+      this.snackBar.open(message, 'Close', {
+        duration: 3000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top'
+      });
     }
   }
 } 
