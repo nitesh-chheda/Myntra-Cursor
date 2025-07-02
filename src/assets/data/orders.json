@@ -1,0 +1,54 @@
+{
+  "orders": [
+    {
+      "id": 1,
+      "userId": 1,
+      "items": [
+        {
+          "productId": 1,
+          "quantity": 2,
+          "size": "M",
+          "color": "White",
+          "price": 29.99
+        }
+      ],
+      "totalAmount": 59.98,
+      "status": "Delivered",
+      "shippingAddress": {
+        "street": "123 Main St",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "10001",
+        "country": "USA"
+      },
+      "paymentMethod": "Credit Card",
+      "orderDate": "2024-03-15T10:30:00Z",
+      "deliveryDate": "2024-03-18T14:20:00Z"
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "items": [
+        {
+          "productId": 2,
+          "quantity": 1,
+          "size": "32",
+          "color": "Blue",
+          "price": 59.99
+        }
+      ],
+      "totalAmount": 59.99,
+      "status": "Processing",
+      "shippingAddress": {
+        "street": "123 Main St",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "10001",
+        "country": "USA"
+      },
+      "paymentMethod": "PayPal",
+      "orderDate": "2024-03-20T15:45:00Z",
+      "deliveryDate": null
+    }
+  ]
+} 

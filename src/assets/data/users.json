@@ -1,0 +1,36 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "user@example.com",
+      "password": "hashedPassword123",
+      "firstName": "John",
+      "lastName": "Doe",
+      "address": {
+        "street": "123 Main St",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "10001",
+        "country": "USA"
+      },
+      "phone": "+1-555-0123",
+      "role": "user"
+    },
+    {
+      "id": 2,
+      "email": "admin@example.com",
+      "password": "hashedPassword456",
+      "firstName": "Admin",
+      "lastName": "User",
+      "address": {
+        "street": "456 Admin Ave",
+        "city": "Los Angeles",
+        "state": "CA",
+        "zipCode": "90001",
+        "country": "USA"
+      },
+      "phone": "+1-555-0124",
+      "role": "admin"
+    }
+  ]
+} 
