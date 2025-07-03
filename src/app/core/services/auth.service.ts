@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 export interface User {
@@ -34,10 +34,13 @@ export class AuthService {
   }
 
   private loadStoredUser() {
-    const token = localStorage.getItem(this.AUTH_TOKEN_KEY);
-    if (token) {
-      // In a real app, you would validate the token and decode user info
-      this.currentUserSubject.next(JSON.parse(token));
+    try {
+      const token = localStorage.getItem(this.AUTH_TOKEN_KEY);
+      if (token) {
+        this.currentUserSubject.next(JSON.parse(token));
+      }
+    } catch (error) {
+      console.error('Error loading user from storage:', error);
     }
   }
 
@@ -52,7 +55,6 @@ export class AuthService {
   }
 
   login(credentials: LoginCredentials): Observable<User> {
-    // Mock users for testing
     const mockUsers = [
       {
         id: 1,
@@ -73,7 +75,6 @@ export class AuthService {
     ];
 
     return new Observable(observer => {
-      // Simulate API call delay
       setTimeout(() => {
         const user = mockUsers.find(
           u => u.email === credentials.email && u.password === credentials.password
@@ -92,7 +93,6 @@ export class AuthService {
   }
 
   register(data: RegisterData): Observable<User> {
-    // Mock users for testing
     const mockUsers = [
       {
         id: 1,
@@ -113,14 +113,12 @@ export class AuthService {
     ];
 
     return new Observable(observer => {
-      // Simulate API call delay
       setTimeout(() => {
         const existingUser = mockUsers.find(u => u.email === data.email);
         if (existingUser) {
           observer.error(new Error('Email already exists'));
           return;
         }
-        // Simulate creating a new user
         const newUser = {
           id: mockUsers.length + 1,
           email: data.email,
@@ -137,7 +135,11 @@ export class AuthService {
   }
 
   logout() {
-    localStorage.removeItem(this.AUTH_TOKEN_KEY);
+    try {
+      localStorage.removeItem(this.AUTH_TOKEN_KEY);
+    } catch (error) {
+      console.error('Error removing user from storage:', error);
+    }
     this.currentUserSubject.next(null);
   }
 
@@ -148,15 +150,11 @@ export class AuthService {
   }
 
   changePassword(currentPassword: string, newPassword: string): Observable<boolean> {
-    // In a real app, this would be a POST request to your backend to change password
-    // For now, we'll simulate the password change
     return new Observable(observer => {
-      // Simulate API call delay
       setTimeout(() => {
-        // In a real app, you would verify the current password and update it
         observer.next(true);
         observer.complete();
       }, 1000);
     });
   }
-} 
+}
