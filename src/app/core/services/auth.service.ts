@@ -34,10 +34,14 @@ export class AuthService {
   }
 
   private loadStoredUser() {
-    const token = localStorage.getItem(this.AUTH_TOKEN_KEY);
-    if (token) {
-      // In a real app, you would validate the token and decode user info
-      this.currentUserSubject.next(JSON.parse(token));
+    try {
+      const token = localStorage.getItem(this.AUTH_TOKEN_KEY);
+      if (token) {
+        // In a real app, you would validate the token and decode user info
+        this.currentUserSubject.next(JSON.parse(token));
+      }
+    } catch (error) {
+      console.error('Error loading user from storage:', error);
     }
   }
 
@@ -65,8 +69,13 @@ export class AuthService {
         return userWithoutPassword;
       }),
       tap(user => {
-        localStorage.setItem(this.AUTH_TOKEN_KEY, JSON.stringify(user));
-        this.currentUserSubject.next(user);
+        try {
+          localStorage.setItem(this.AUTH_TOKEN_KEY, JSON.stringify(user));
+          this.currentUserSubject.next(user);
+        } catch (error) {
+          console.error('Error saving user to storage:', error);
+          throw error;
+        }
       })
     );
   }
@@ -90,14 +99,23 @@ export class AuthService {
         return newUser;
       }),
       tap(user => {
-        localStorage.setItem(this.AUTH_TOKEN_KEY, JSON.stringify(user));
-        this.currentUserSubject.next(user);
+        try {
+          localStorage.setItem(this.AUTH_TOKEN_KEY, JSON.stringify(user));
+          this.currentUserSubject.next(user);
+        } catch (error) {
+          console.error('Error saving user to storage:', error);
+          throw error;
+        }
       })
     );
   }
 
   logout() {
-    localStorage.removeItem(this.AUTH_TOKEN_KEY);
+    try {
+      localStorage.removeItem(this.AUTH_TOKEN_KEY);
+    } catch (error) {
+      console.error('Error removing user from storage:', error);
+    }
     this.currentUserSubject.next(null);
   }
 
