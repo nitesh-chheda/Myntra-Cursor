@@ -14,14 +14,25 @@ export class WishlistService {
   }
 
   private loadWishlistFromStorage() {
-    const storedWishlist = localStorage.getItem(this.WISHLIST_STORAGE_KEY);
-    if (storedWishlist) {
-      this.wishlistItems.next(JSON.parse(storedWishlist));
+    try {
+      const storedWishlist = localStorage.getItem(this.WISHLIST_STORAGE_KEY);
+      if (storedWishlist && storedWishlist !== 'null') {
+        const parsed = JSON.parse(storedWishlist);
+        if (Array.isArray(parsed)) {
+          this.wishlistItems.next(parsed);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading wishlist from storage:', error);
     }
   }
 
   private saveWishlistToStorage(items: Product[]) {
-    localStorage.setItem(this.WISHLIST_STORAGE_KEY, JSON.stringify(items));
+    try {
+      localStorage.setItem(this.WISHLIST_STORAGE_KEY, JSON.stringify(items));
+    } catch (error) {
+      console.error('Error saving wishlist to storage:', error);
+    }
   }
 
   getWishlistItems(): Observable<Product[]> {

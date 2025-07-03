@@ -21,14 +21,25 @@ export class CartService {
   }
 
   private loadCartFromStorage() {
-    const storedCart = localStorage.getItem(this.CART_STORAGE_KEY);
-    if (storedCart) {
-      this.cartItems.next(JSON.parse(storedCart));
+    try {
+      const storedCart = localStorage.getItem(this.CART_STORAGE_KEY);
+      if (storedCart && storedCart !== 'null') {
+        const parsed = JSON.parse(storedCart);
+        if (Array.isArray(parsed)) {
+          this.cartItems.next(parsed);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading cart from storage:', error);
     }
   }
 
   private saveCartToStorage(items: CartItem[]) {
-    localStorage.setItem(this.CART_STORAGE_KEY, JSON.stringify(items));
+    try {
+      localStorage.setItem(this.CART_STORAGE_KEY, JSON.stringify(items));
+    } catch (error) {
+      console.error('Error saving cart to storage:', error);
+    }
   }
 
   getCartItems(): Observable<CartItem[]> {
