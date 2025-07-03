@@ -27,58 +27,78 @@ import { WishlistService } from '../../services/wishlist.service';
     FormsModule
   ],
   template: `
-    <mat-toolbar color="primary" class="myntra-toolbar">
-      <a routerLink="/" class="logo">
+    <mat-toolbar color="primary" class="myntra-toolbar" role="banner">
+      <a routerLink="/" class="logo" aria-label="Myntra Home">
         <img src="assets/myntra-logo.svg" alt="Myntra" height="36" style="vertical-align: middle;"/>
       </a>
-      <nav class="category-nav">
-        <a mat-button routerLink="/men">Men</a>
-        <a mat-button routerLink="/women">Women</a>
-        <a mat-button routerLink="/kids">Kids</a>
-        <a mat-button routerLink="/home-living">Home & Living</a>
-        <a mat-button routerLink="/beauty">Beauty</a>
-        <a mat-button routerLink="/studio">Studio</a>
+      <nav class="category-nav" role="navigation" aria-label="Main navigation">
+        <a mat-button routerLink="/men" aria-label="Men's clothing">Men</a>
+        <a mat-button routerLink="/women" aria-label="Women's clothing">Women</a>
+        <a mat-button routerLink="/kids" aria-label="Kids' clothing">Kids</a>
+        <a mat-button routerLink="/home-living" aria-label="Home and Living">Home & Living</a>
+        <a mat-button routerLink="/beauty" aria-label="Beauty products">Beauty</a>
+        <a mat-button routerLink="/studio" aria-label="Studio">Studio</a>
       </nav>
-      <div class="search-bar">
+      <div class="search-bar" role="search">
         <mat-form-field appearance="outline" class="search-field">
           <mat-icon matPrefix>search</mat-icon>
-          <input matInput placeholder="Search for products, brands and more" />
+          <input 
+            matInput 
+            placeholder="Search for products, brands and more" 
+            aria-label="Search for products, brands and more"
+            (keyup.enter)="onSearch()"
+            [(ngModel)]="searchQuery" />
         </mat-form-field>
       </div>
       <div class="spacer"></div>
-      <div class="user-actions">
-        <a mat-icon-button routerLink="/wishlist" matTooltip="Wishlist">
+      <div class="user-actions" role="navigation" aria-label="User actions">
+        <a 
+          mat-icon-button 
+          routerLink="/wishlist" 
+          matTooltip="Wishlist"
+          [attr.aria-label]="'View wishlist (' + wishlistItemCount + ' items)'"
+          [attr.aria-describedby]="wishlistItemCount > 0 ? 'wishlist-count' : null">
           <mat-icon [matBadge]="wishlistItemCount > 0 ? wishlistItemCount : null" matBadgeColor="warn">favorite_border</mat-icon>
         </a>
-        <a mat-icon-button routerLink="/cart" matTooltip="Cart">
+        <a 
+          mat-icon-button 
+          routerLink="/cart" 
+          matTooltip="Shopping Cart"
+          [attr.aria-label]="'View cart (' + cartItemCount + ' items)'"
+          [attr.aria-describedby]="cartItemCount > 0 ? 'cart-count' : null">
           <mat-icon [matBadge]="cartItemCount > 0 ? cartItemCount : null" matBadgeColor="warn">shopping_bag</mat-icon>
         </a>
         <ng-container *ngIf="currentUser; else authButtons">
-          <button mat-icon-button [matMenuTriggerFor]="userMenu" matTooltip="Account">
+          <button 
+            mat-icon-button 
+            [matMenuTriggerFor]="userMenu" 
+            matTooltip="Account"
+            [attr.aria-label]="'Account menu for ' + (currentUser?.firstName || 'user')"
+            aria-haspopup="true">
             <mat-icon>person</mat-icon>
           </button>
-          <mat-menu #userMenu="matMenu">
-            <button mat-menu-item routerLink="/profile">
+          <mat-menu #userMenu="matMenu" role="menu">
+            <button mat-menu-item routerLink="/profile" role="menuitem">
               <mat-icon>person</mat-icon>
               <span>Profile</span>
             </button>
-            <button mat-menu-item routerLink="/orders">
+            <button mat-menu-item routerLink="/orders" role="menuitem">
               <mat-icon>shopping_bag</mat-icon>
               <span>Orders</span>
             </button>
-            <button mat-menu-item *ngIf="isAdmin" routerLink="/admin">
+            <button mat-menu-item *ngIf="isAdmin" routerLink="/admin" role="menuitem">
               <mat-icon>admin_panel_settings</mat-icon>
               <span>Admin</span>
             </button>
-            <button mat-menu-item (click)="logout()">
+            <button mat-menu-item (click)="logout()" role="menuitem">
               <mat-icon>exit_to_app</mat-icon>
               <span>Logout</span>
             </button>
           </mat-menu>
         </ng-container>
         <ng-template #authButtons>
-          <a mat-button routerLink="/auth/login">Login</a>
-          <a mat-raised-button color="accent" routerLink="/auth/register">Register</a>
+          <a mat-button routerLink="/auth/login" aria-label="Login to your account">Login</a>
+          <a mat-button routerLink="/auth/register" aria-label="Create new account">Register</a>
         </ng-template>
       </div>
     </mat-toolbar>
@@ -136,6 +156,33 @@ import { WishlistService } from '../../services/wishlist.service';
       z-index: 1000;
       min-height: 64px;
     }
+    
+    /* Accessibility improvements */
+    .logo:focus,
+    .category-nav a:focus,
+    .user-actions a:focus,
+    .user-actions button:focus {
+      outline: 2px solid #ff6b6b;
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+    
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+      .myntra-toolbar {
+        border-bottom: 2px solid;
+      }
+    }
+    
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+    
     @media (max-width: 900px) {
       .category-nav, .search-bar {
         display: none;
@@ -148,6 +195,7 @@ export class HeaderComponent implements OnInit {
   isAdmin = false;
   cartItemCount = 0;
   wishlistItemCount = 0;
+  searchQuery = '';
 
   constructor(
     private authService: AuthService,
@@ -171,6 +219,13 @@ export class HeaderComponent implements OnInit {
     this.wishlistService.getWishlistCount().subscribe(count => {
       this.wishlistItemCount = count;
     });
+  }
+
+  onSearch() {
+    if (this.searchQuery.trim()) {
+      // Implement search navigation
+      console.log('Searching for:', this.searchQuery);
+    }
   }
 
   logout() {

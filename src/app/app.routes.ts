@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { AuthGuard } from './core/guards/auth.guard';
+import { AdminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -7,7 +9,8 @@ export const routes: Routes = [
   },
   {
     path: 'products',
-    loadComponent: () => import('./features/products/product-list/product-list.component').then(m => m.ProductListComponent)
+    loadComponent: () => import('./features/products/product-list/product-list.component').then(m => m.ProductListComponent),
+    data: { preload: true }
   },
   {
     path: 'products/:id',
@@ -15,11 +18,15 @@ export const routes: Routes = [
   },
   {
     path: 'cart',
-    loadComponent: () => import('./features/cart/cart.component').then(m => m.CartComponent)
+    loadComponent: () => import('./features/cart/cart.component').then(m => m.CartComponent),
+    canActivate: [AuthGuard],
+    data: { preload: true }
   },
   {
     path: 'wishlist',
-    loadComponent: () => import('./features/wishlist/wishlist.component').then(m => m.WishlistComponent)
+    loadComponent: () => import('./features/wishlist/wishlist.component').then(m => m.WishlistComponent),
+    canActivate: [AuthGuard],
+    data: { preload: true }
   },
   {
     path: 'auth',
@@ -36,7 +43,8 @@ export const routes: Routes = [
   },
   {
     path: 'checkout',
-    loadComponent: () => import('./features/checkout/checkout.component').then(m => m.CheckoutComponent)
+    loadComponent: () => import('./features/checkout/checkout.component').then(m => m.CheckoutComponent),
+    canActivate: [AuthGuard]
   },
   {
     path: 'profile',
@@ -44,7 +52,8 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
-    loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES)
+    loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES),
+    canActivate: [AuthGuard, AdminGuard]
   },
   {
     path: '**',
