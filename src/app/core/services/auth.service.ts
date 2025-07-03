@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 export interface User {
@@ -37,7 +37,6 @@ export class AuthService {
     try {
       const token = localStorage.getItem(this.AUTH_TOKEN_KEY);
       if (token) {
-        // In a real app, you would validate the token and decode user info
         this.currentUserSubject.next(JSON.parse(token));
       }
     } catch (error) {
@@ -56,58 +55,83 @@ export class AuthService {
   }
 
   login(credentials: LoginCredentials): Observable<User> {
-    // In a real app, this would be a POST request to your backend
-    return this.http.get<any>(this.USERS_API).pipe(
-      map(response => {
-        const user = response.users.find(
-          (u: any) => u.email === credentials.email && u.password === credentials.password
+    const mockUsers = [
+      {
+        id: 1,
+        email: 'user@example.com',
+        password: 'hashedPassword123',
+        firstName: 'John',
+        lastName: 'Doe',
+        role: 'user'
+      },
+      {
+        id: 2,
+        email: 'admin@example.com',
+        password: 'hashedPassword456',
+        firstName: 'Admin',
+        lastName: 'User',
+        role: 'admin'
+      }
+    ];
+
+    return new Observable(observer => {
+      setTimeout(() => {
+        const user = mockUsers.find(
+          u => u.email === credentials.email && u.password === credentials.password
         );
         if (!user) {
-          throw new Error('Invalid credentials');
+          observer.error(new Error('Invalid credentials'));
+          return;
         }
         const { password, ...userWithoutPassword } = user;
-        return userWithoutPassword;
-      }),
-      tap(user => {
-        try {
-          localStorage.setItem(this.AUTH_TOKEN_KEY, JSON.stringify(user));
-          this.currentUserSubject.next(user);
-        } catch (error) {
-          console.error('Error saving user to storage:', error);
-          throw error;
-        }
-      })
-    );
+        localStorage.setItem(this.AUTH_TOKEN_KEY, JSON.stringify(userWithoutPassword));
+        this.currentUserSubject.next(userWithoutPassword);
+        observer.next(userWithoutPassword);
+        observer.complete();
+      }, 500);
+    });
   }
 
   register(data: RegisterData): Observable<User> {
-    // In a real app, this would be a POST request to your backend
-    return this.http.get<any>(this.USERS_API).pipe(
-      map(response => {
-        const existingUser = response.users.find((u: any) => u.email === data.email);
+    const mockUsers = [
+      {
+        id: 1,
+        email: 'user@example.com',
+        password: 'hashedPassword123',
+        firstName: 'John',
+        lastName: 'Doe',
+        role: 'user'
+      },
+      {
+        id: 2,
+        email: 'admin@example.com',
+        password: 'hashedPassword456',
+        firstName: 'Admin',
+        lastName: 'User',
+        role: 'admin'
+      }
+    ];
+
+    return new Observable(observer => {
+      setTimeout(() => {
+        const existingUser = mockUsers.find(u => u.email === data.email);
         if (existingUser) {
-          throw new Error('Email already exists');
+          observer.error(new Error('Email already exists'));
+          return;
         }
-        // Simulate creating a new user
         const newUser = {
-          id: response.users.length + 1,
+          id: mockUsers.length + 1,
           email: data.email,
           firstName: data.firstName,
           lastName: data.lastName,
           role: 'user'
         };
-        return newUser;
-      }),
-      tap(user => {
-        try {
-          localStorage.setItem(this.AUTH_TOKEN_KEY, JSON.stringify(user));
-          this.currentUserSubject.next(user);
-        } catch (error) {
-          console.error('Error saving user to storage:', error);
-          throw error;
-        }
-      })
-    );
+        localStorage.setItem(this.AUTH_TOKEN_KEY, JSON.stringify(newUser));
+        this.currentUserSubject.next(newUser);
+        observer.next(newUser);
+        observer.complete();
+      }, 500);
+    });
   }
 
   logout() {
@@ -124,4 +148,13 @@ export class AuthService {
       map(user => user?.role === 'admin')
     );
   }
-} 
+
+  changePassword(currentPassword: string, newPassword: string): Observable<boolean> {
+    return new Observable(observer => {
+      setTimeout(() => {
+        observer.next(true);
+        observer.complete();
+      }, 1000);
+    });
+  }
+}

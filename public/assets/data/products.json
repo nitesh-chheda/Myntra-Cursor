@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "name": "Classic White T-Shirt",
+    "description": "Premium cotton t-shirt with a comfortable fit",
+    "price": 29.99,
+    "category": "Clothing",
+    "subCategory": "T-Shirts",
+    "brand": "Fashion Brand",
+    "sizes": ["S", "M", "L", "XL"],
+    "colors": ["White", "Black", "Navy"],
+    "images": [
+      "assets/images/products/tshirt-1.jpg",
+      "assets/images/products/tshirt-2.jpg"
+    ],
+    "rating": 4.5,
+    "reviews": 128,
+    "inStock": true
+  },
+  {
+    "id": 2,
+    "name": "Slim Fit Jeans",
+    "description": "Modern slim fit jeans with stretch comfort",
+    "price": 59.99,
+    "category": "Clothing",
+    "subCategory": "Jeans",
+    "brand": "Denim Co",
+    "sizes": ["28", "30", "32", "34", "36"],
+    "colors": ["Blue", "Black", "Grey"],
+    "images": [
+      "assets/images/products/jeans-1.jpg",
+      "assets/images/products/jeans-2.jpg"
+    ],
+    "rating": 4.3,
+    "reviews": 95,
+    "inStock": true
+  }
+] 
